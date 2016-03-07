@@ -1,0 +1,35 @@
+{
+  "name": "metafocus",
+  "version": "0.1.0",
+  "description": "A highly configurable rsvp reader with new reticle types.",
+  "main": "index.js",
+  "scripts": {
+    "test": "make test"
+  },
+  "author": "Mark Cafazzo <mark.cafazzo@gmail.com> (http://markcafazzo.com/)",
+  "license": "MIT",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.4.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/capacitive/metafocus.git"
+  },
+  "keywords": [
+    "rsvp",
+    "pdf",
+    "reader",
+    "speedreading",
+    "wpm",
+    "reading",
+    "comprehension"
+  ],
+  "bugs": {
+    "url": "https://github.com/capacitive/metafocus/issues"
+  },
+  "homepage": "https://github.com/capacitive/metafocus#readme",
+  "dependencies": {
+    "pdf-textstring": "0.0.7"
+  }
+}
