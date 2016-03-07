@@ -78,7 +78,7 @@ function createReticle(){
   //var reticlePlaceholder = document.querySelector('#reticlePlaceholder');
   //clone.querySelector('#reader').textContent = 'reticle';
   return clone;
-},
+}
 
 //init:
 var reticle = createReticle();
