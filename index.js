@@ -1,13 +1,4 @@
 module.exports = {
-  createReticle: function(){
-    var reticleTemplate = document.querySelector('#reticle-template');
-    var template = reticleTemplate.import.querySelector('#reticle');
-    var clone = document.importNode(template.content, true);
-    //var reticlePlaceholder = document.querySelector('#reticlePlaceholder');
-    //clone.querySelector('#reader').textContent = 'reticle';
-    return clone;
-  },
-
   startReading: function() {
     wait(delay).then(function () {
       reader.replaceWith("<div id='reader' class='metafocus showBorder'>" + filteredArray[counter] + "</div>");
@@ -80,10 +71,21 @@ var pauseButton = document.getElementById('pause');
 var reader = document.getElementById('reticle');
 var fileName = document.getElementById('fileName');
 
+function createReticle(){
+  var reticleTemplate = document.querySelector('#reticle-template');
+  var template = reticleTemplate.import.querySelector('#reticle');
+  var clone = document.importNode(template.content, true);
+  //var reticlePlaceholder = document.querySelector('#reticlePlaceholder');
+  //clone.querySelector('#reader').textContent = 'reticle';
+  return clone;
+},
+
 //init:
 var reticle = createReticle();
 var reticlePlaceholder = document.querySelector('#reticlePlaceholder');
 reticlePlaceholder.appendChild(reticle);
+
+
 
 function simpleFilter(value){
   var matchesFilter = false;
