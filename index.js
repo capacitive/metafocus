@@ -1,5 +1,5 @@
 'use strict';
-
+var pdftext = require('pdf-textstring');
 var promiseCount = 0;
 var reticle, counterElement;
 let counter = 0, delay = 700;
