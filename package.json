@@ -1,6 +1,6 @@
 {
   "name": "metafocus",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A highly configurable rsvp reader with new reticle types.",
   "main": "index.js",
   "scripts": {
