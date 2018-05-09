@@ -1,19 +1,120 @@
+'use strict';
+
+var promiseCount = 0;
+var reticle, counterElement;
+let counter = 0, delay = 700;
+let pause = false, skip = false, rewind = false;
+let fileArray, filteredArray, tempArray = [];
+
+function wait(delay){
+  var thisPromiseCount = ++promiseCount;
+  console.log('promiseCount: %d, delay: %d', promiseCount, delay);
+  var promise = new Promise(
+    function(resolve, reject){
+      console.log('promise function...');
+      setTimeout(function(){
+        resolve(thisPromiseCount);
+      }, delay)
+    }
+  );
+  return promise;
+};
+
 module.exports = {
-  startReading: function() {
-    wait(delay).then(function () {
-      reader.replaceWith("<div id='reader' class='metafocus showBorder'>" + filteredArray[counter] + "</div>");
-      counter++;
+  startReading: function(ret, counterElem) {
+    //console.log('startReading()! ret param: %o, reticle ref: %o', ret, reticle);
+    if(ret) {
+      reticle = ret;
+    }
+    if(counterElem) {
+      counterElement = counterElem;
+    }
+    wait(delay).then(function() {
+      // console.log('promise THEN');
+      // console.log('reticle: %o', reticle);
       if (pause) {
         return;
       }
+
+      reticle.innerHTML = filteredArray[counter];
+      counterElement.innerHTML = counter;
+
+      if (skip) {
+        var skipCount = counter++;
+        if(skipCount < filteredArray.length)
+          counter = skipCount;
+      }
+      else if (rewind) {
+        var rewindCount = counter--;
+        if (rewindCount > 0)
+          counter = rewindCount;
+      } else {
+        counter++;
+      }
+      
       startReading();
     });
   },
 
-  handleFile: function(files) {
+  getTextFromPDF: function (path, filename, pathToPdftotext, pathToPdffonts, customFilter, cb) {
+    console.log('callback function: %o', cb);
+    pdftext.setBinaryPath_PdfToText(pathToPdftotext);
+    pdftext.setBinaryPath_PdfFont(pathToPdffonts);
+    pdftext.pdftotext(path, function (err, data) {
+      if (err) {
+        console.log(err);
+      } else {
+        tempArray = data.split(' ');
+        filteredArray = tempArray.filter(customFilter);
+        filteredArray.forEach(function(value, idx) {
+          //console.log(value);
+          //var theString = value.toString();
+          var regExLineBreaks = /\r{1}/g;
+          if(value.match(regExLineBreaks)) {
+            var arrayOfNewWords = [];
+            var match, firstWord, extraWord;
+            if((match = regExLineBreaks.exec(value)) != null) {
+              //console.log('FOUND MATCH: %s AT INDEX: %d', value, match.index);
+              if(match.index > 1) {
+                firstWord = value.substr(0, match.index);
+                extraWord = value.substr(match.index, value.length);
+                filteredArray[idx] = firstWord;
+                filteredArray.splice(idx + 1, 0, extraWord);
+              }
+            }
+          }
+          // var theWord = filteredArray[idx];
+          // var midPoint = getMiddle(theWord);
+          // var formatted = '';
+          // if(midPoint.index > 0) {
+          //   formatted = theWord.substr(0, midPoint.index) + '<b>' + midPoint.val + '</b>' 
+          // + theWord.substr(midPoint.index + 1, theWord.length);
+          // filteredArray[idx] = formatted;
+          // } else {
+          //   formatted = midPoint.val;
+          // }
+        });
+  
+        //console.log(JSON.stringify(filteredArray));
+        console.log('Loaded PDF.');
+        cb(filename, filteredArray.length);
+      }
+    });
+  },
+
+  returnPDFFormattedAsText: function(){
+    if(fileArray.length > 0){
+
+    }
+  },
+
+  handleFile: function(files, pathToPdftotext, pathToPdffonts, customFilter, cb) {
+    fileArray = files;
+    counter = 0;
     console.log('handleFile()!');
-    fileName.replaceWith("<div id='fileName' class='fileUpload showBorder'>" + files[0].name + "</div>");
-    getTextFromPDF(files[0].path);
+    //console.log(fileArray);
+    //filename = files[0].name;
+    filename = getTextFromPDF(files[0].path, files[0].name, pathToPdftotext, pathToPdffonts, customFilter, cb);    //return filename;
   },
 
   //formula:   60 / ((total_time / 1000) / total_characters) / 5 + .05
@@ -23,145 +124,69 @@ module.exports = {
         delay = 1200;
         break;
       case '100':
-        delay = 1195;
+        delay = 600;
         break;
       case '150':
-        delay = 1190;
+        delay = 550;
         break;
       case '200':
-        delay = 400;
+        delay = 450;
         break;
       case '250':
-        delay = 350;
+        delay = 400;
         break;
       case '400':
-        delay = 200;
+        delay = 250;
         break;
     }
     var wpmCalc = 60 / ((delay / 1000) / wpm) / 5 + .05;
     console.log('set WPM to: ' + wpm + "wpm - " + delay + "ms");
     console.log('wpm calc: ', wpmCalc / 10);
+    return wpmCalc;
   },
 
-  setPause : function(){
+  setPause : function(button){
+    console.log('pauseButton (param): ', button);
+    console.log('pauseButton (var): ', pauseButton);
     pause = !pause;
-    //console.log('pause: ', pause);
     if(pause) {
-      pauseButton.innerHTML = "resume";
+      button.innerHTML = "resume";
     } else {
-      pauseButton.innerHTML = "pause"
+      button.innerHTML = "pause"
       startReading();
     }
+  },
+
+  setFF: function(button){
+    skip = !skip;
+    rewind = !rewind;
+    if(counter >= 0) {
+      counter++;
+      reticle.innerHTML = filteredArray[counter];
+      counterElement.innerHTML = counter;
+    }
+    // if(skip) {
+    //   button.innerHTML = "FF";
+    // } else {
+    //   button.innerHTML = ">>";
+    // }
+  },
+
+  setRewind: function(button){
+    rewind = !rewind;
+    skip = !skip;
+    if(counter >= 0) {
+      counter--;
+      reticle.innerHTML = filteredArray[counter];
+      counterElement.innerHTML = counter;
+    }
+    // if(rewind) {
+    //   button.innerHTML = "RR";
+    // } else {
+    //   button.innerHTML = "<<";
+    // }
   }
 };
-
-var pdftext = require('pdf-textstring');
-var path = require('path');
-
-var AbsolutePathToApp = path.dirname(process.mainModule.filename);
-var pathToPdftotext = AbsolutePathToApp + "/binaries/pdftotext.exe";
-var pathToPdffonts = AbsolutePathToApp + "/binaries/pdffonts.exe";
-var tempArray = [];
-var filteredArray = [];
-var counter = 0;
-var promiseCount = 0;
-var delay = 700;
-var pause = false;
-var pauseButton = document.getElementById('pause');
-var reader = document.getElementById('reticle');
-var fileName = document.getElementById('fileName');
-
-function createReticle(){
-  var reticleTemplate = document.querySelector('#reticle-template');
-  var template = reticleTemplate.import.querySelector('#reticle');
-  var clone = document.importNode(template.content, true);
-  //var reticlePlaceholder = document.querySelector('#reticlePlaceholder');
-  //clone.querySelector('#reader').textContent = 'reticle';
-  return clone;
-}
-
-//init:
-var reticle = createReticle();
-var reticlePlaceholder = document.querySelector('#reticlePlaceholder');
-reticlePlaceholder.appendChild(reticle);
-
-
-
-function simpleFilter(value){
-  var matchesFilter = false;
-  switch(value){
-    case '':
-      matchesFilter = true;
-      break;
-    case 'Mark':
-      matchesFilter = true;
-      break;
-    case 'Mar':
-      matchesFilter = true;
-      break;
-    case '1':
-      matchesFilter = true;
-      break;
-    case '14':
-      matchesFilter = true;
-      break;
-    case '2,':
-      matchesFilter = true;
-      break;
-    case 'Cafazzo':
-      matchesFilter = true;
-      break;
-  }
-
-  if(value.includes("paizo.com")
-    || value.includes("mark.cafazzo@gmail.com")
-    || value.includes("6677096")
-    || value.includes("1121093")
-    || value.includes("1121094")
-    || value.includes("2016")
-    || value.includes("455")){
-    matchesFilter = true;
-  }
-
-  var regexNumbers = "/^\d+$/";
-  if(value.match(regexNumbers)){
-    matchesFilter = true;
-  }
-
-  return !matchesFilter;
-}
-
-function getTextFromPDF(path) {
-  counter = 0;
-  pdftext.setBinaryPath_PdfToText(pathToPdftotext);
-  pdftext.setBinaryPath_PdfFont(pathToPdffonts);
-  pdftext.pdftotext(path, function (err, data) {
-    if (err) {
-      console.log(err);
-    } else {
-      tempArray = data.split(' ');
-      filteredArray = tempArray.filter(simpleFilter);
-      console.log(JSON.stringify(filteredArray));
-    }
-  });
-}
-
-function wait(delay){
-  var thisPromiseCount = ++promiseCount;
-  var promise = new Promise(
-    function(resolve, reject){
-      setTimeout(function(){
-        resolve(thisPromiseCount);
-      }, delay)
-    }
-  );
-  return promise;
-}
-
-var div = document.getElementsByClassName('pause')[0];
-div.addEventListener('click', function (event) {
-  setPause();
-});
 
 
 
