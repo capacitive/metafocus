@@ -1,5 +1,10 @@
 'use strict';
 var pdftext = require('pdf-textstring');
+var path = require('path');
+var AbsolutePathToApp = path.dirname(process.mainModule.filename);
+var pathToPdftotext = AbsolutePathToApp + "/binaries/pdftotext.exe";
+var pathToPdffonts = AbsolutePathToApp + "/binaries/pdffonts.exe";
+
 var promiseCount = 0;
 var reticle, counterElement;
 let counter = 0, delay = 700;
@@ -8,10 +13,10 @@ let fileArray, filteredArray, tempArray = [];
 
 function wait(delay){
   var thisPromiseCount = ++promiseCount;
-  console.log('promiseCount: %d, delay: %d', promiseCount, delay);
+  //console.log('promiseCount: %d, delay: %d', promiseCount, delay);
   var promise = new Promise(
     function(resolve, reject){
-      console.log('promise function...');
+      //console.log('promise function...');
       setTimeout(function(){
         resolve(thisPromiseCount);
       }, delay)
@@ -22,7 +27,7 @@ function wait(delay){
 
 module.exports = {
   startReading: function(ret, counterElem) {
-    //console.log('startReading()! ret param: %o, reticle ref: %o', ret, reticle);
+    //console.log('startReading()! ret param: %o', ret);
     if(ret) {
       reticle = ret;
     }
@@ -56,10 +61,16 @@ module.exports = {
     });
   },
 
-  getTextFromPDF: function (path, filename, pathToPdftotext, pathToPdffonts, customFilter, cb) {
-    console.log('callback function: %o', cb);
-    pdftext.setBinaryPath_PdfToText(pathToPdftotext);
-    pdftext.setBinaryPath_PdfFont(pathToPdffonts);
+  getTextFromPDF: function (path, filename, customFilter, cb) {
+    //console.log('callback function: %o', cb);
+    var os = process.platform;
+
+    console.log('OS is: %s', os);
+    if(os === 'win32') {
+      console.log('Win32 OS');
+      pdftext.setBinaryPath_PdfToText(pathToPdftotext);
+      pdftext.setBinaryPath_PdfFont(pathToPdffonts);
+    }
     pdftext.pdftotext(path, function (err, data) {
       if (err) {
         console.log(err);
@@ -68,7 +79,6 @@ module.exports = {
         filteredArray = tempArray.filter(customFilter);
         filteredArray.forEach(function(value, idx) {
           //console.log(value);
-          //var theString = value.toString();
           var regExLineBreaks = /\r{1}/g;
           if(value.match(regExLineBreaks)) {
             var arrayOfNewWords = [];
@@ -108,13 +118,13 @@ module.exports = {
     }
   },
 
-  handleFile: function(files, pathToPdftotext, pathToPdffonts, customFilter, cb) {
+  handleFile: function(files, customFilter, cb) {
     fileArray = files;
     counter = 0;
-    console.log('handleFile()!');
+    //console.log('handleFile(): filepath = %s', files[0].path);
     //console.log(fileArray);
     //filename = files[0].name;
-    filename = getTextFromPDF(files[0].path, files[0].name, pathToPdftotext, pathToPdffonts, customFilter, cb);    //return filename;
+    filename = getTextFromPDF(files[0].path, files[0].name, customFilter, cb);    //return filename;
   },
 
   //formula:   60 / ((total_time / 1000) / total_characters) / 5 + .05
@@ -138,6 +148,12 @@ module.exports = {
       case '400':
         delay = 250;
         break;
+      case '500':
+        delay = 200;
+        break;
+      case '600':
+        delay = 150;
+        break;
     }
     var wpmCalc = 60 / ((delay / 1000) / wpm) / 5 + .05;
     console.log('set WPM to: ' + wpm + "wpm - " + delay + "ms");
@@ -146,8 +162,8 @@ module.exports = {
   },
 
   setPause : function(button){
-    console.log('pauseButton (param): ', button);
-    console.log('pauseButton (var): ', pauseButton);
+    //console.log('pauseButton (param): ', button);
+    //console.log('pauseButton (var): ', pauseButton);
     pause = !pause;
     if(pause) {
       button.innerHTML = "resume";

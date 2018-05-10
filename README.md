@@ -25,15 +25,18 @@ To conveniently use metafocus in your code, you'll need to set up a reference fo
     setFF = metafocus.setFF;
     setRewind = metafocus.setRewind;
 ```
-Next, you need to provide the paths to the pdftotext binaries:
-```javascript
-    var path = require('path');
-    var AbsolutePathToApp = path.dirname(process.mainModule.filename);
-    var pathToPdftotext = AbsolutePathToApp + "/binaries/pdftotext.exe";
-    var pathToPdffonts = AbsolutePathToApp + "/binaries/pdffonts.exe";
+#### Linux
+Metafocus requires **pdftext** and **pdffonts**, which requires **poppler-utils** to be installed:
+
+Debian/Ubuntu:
+```bash
+apt-get install poppler-utils
 ```
 
-The reason this is done outside of the metafocus module is to give you more control over which operating system you're using with metafocus.  A later version will have OS auto-detect features so you won't have to.
+Fedora/CentOS:
+```bash
+yum install poppler-utils
+```
 
 The methods below are expecting references to the UI controls you are using to interface with the metafocus library (events, UI rendering, etc.) as their parameters:
 
@@ -109,7 +112,7 @@ var readFile = function(files){
     });
 }
 ```
-The filter is a function you create and pass in as a parameter to ther readFile() function.  The example below will remove an email and name from the text, along with a regex that matches unwanted numbers:
+The filter is a function you create and pass in as a parameter to the readFile() function.  The example below will remove an email and name from the text, along with a regex that matches unwanted numbers:
 
 ```javascript
 
