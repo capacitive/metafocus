@@ -76,7 +76,11 @@ module.exports = {
         console.log(err);
       } else {
         tempArray = data.split(' ');
-        filteredArray = tempArray.filter(customFilter);
+        if(customFilter) {
+          filteredArray = tempArray.filter(customFilter);
+        } else {
+          filteredArray = tempArray;
+        }
         filteredArray.forEach(function(value, idx) {
           //console.log(value);
           var regExLineBreaks = /\r{1}/g;

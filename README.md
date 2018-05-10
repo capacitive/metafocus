@@ -101,18 +101,18 @@ rewindButton.addEventListener('click', function (event) {
 });
 ```
 
-#### readFile(files, pathToPdftotext, pathToPdffonts, customFilter, cb)
-Pass the pdftotext paths you createdf earlier, along with a filter and a callback that will update the UI when the file read is completed:
+#### readFile(files, customFilter, cb)
+Pass a callback that will update the UI when the file read is completed:
 
 ```javascript
 var readFile = function(files){
-    var filename = handleFile(files, pathToPdftotext, pathToPdffonts, simpleFilter, function(filename, wordCount){
+    var filename = handleFile(files, simpleFilter, function(filename, wordCount){
         fileNamePlaceholder.innerHTML = "<div id='fileName' class='fileUpload showBorder'>" + filename + "</div>";
         wordCountDiv.innerHTML = wordCount;
     });
 }
 ```
-The filter is a function you create and pass in as a parameter to the readFile() function.  The example below will remove an email and name from the text, along with a regex that matches unwanted numbers:
+The filter is an optional function you create and pass in as a parameter to the readFile() function.  The example below will remove an email and name from the text, along with a regex that matches unwanted numbers:
 
 ```javascript
 
